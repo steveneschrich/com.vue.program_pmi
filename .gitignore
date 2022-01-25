@@ -1,0 +1,25 @@
+# misc
+*.DS_Store
+notes/
+
+# client
+client/npm-debug.log*
+client/yarn-debug.log*
+client/yarn-error.log*
+client/pnpm-debug.log*
+client/node_modules
+client/dist
+client/.env*
+
+# external git repos
+citeproc-js-server/
+translation-server/
+
+# Editor directories and files
+.idea
+.vscode
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
