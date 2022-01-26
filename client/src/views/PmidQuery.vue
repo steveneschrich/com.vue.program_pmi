@@ -28,7 +28,12 @@
     <p/>
     <Citation :citation="citation"/>
     <p/>
-    <StoreCitation :citation="citation" :zoteroSearchObj="zoteroSearchObj"/>
+    <StoreCitation
+      :citation="citation"
+      :zoteroSearchObj="zoteroSearchObj[0]"
+      :pmid="pmid"
+      :pmcid="pmcid"
+    />
     <div v-if="errorMessage !== ''" id="errorMessage">
       {{ errorMessage }}
     </div>
@@ -46,6 +51,7 @@
   const ZOTERO_SEARCH_URL = `${ZOTERO_BASE_URL}/search`
   const ZOTERO_EXPORT_TO_CSLJSON = `${ZOTERO_BASE_URL}/export?format=csljson`
   const CITEPROC_GET_MLA_CITATIONS = `${CITEPROC_BASE_URL}?responseformat=html&style=modern-language-association&outputformat=text`
+  const RETRIEVE_PMCID_PMID_URL =   `https://www.ncbi.nlm.nih.gov/pmc/utils/idconv/v1.0/?tool=${process.env.VUE_APP_NCBI_TOOL_NAME}&email=${process.env.VUE_APP_NCBI_USER_EMAIL}&versions=no&format=json&&ids=`
 
   export default {
     name: 'PmidQuery',
@@ -53,26 +59,29 @@
     data () {
       return {
         pmid: '',
+        pmcid: '',
         citation: '',
-        zoteroSearchObj: [],
+        zoteroSearchObj: {},
         errorMessage: ''
       }
     },
     methods: {
-      onKeyPress (e) {
+      async onKeyPress (e) {
         if (e.key.toLowerCase() === 'enter') {
+          await this.checkAndConvertPMCIDtoPMID()
           this.submit()
         }
       },
-      onClickSubmit () {
+      async onClickSubmit () {
+        await this.checkAndConvertPMCIDtoPMID()
         this.submit()
       },
       async submit () {
 
         this.citation = ''
-        this.zoteroSearchObj = ''
+        this.zoteroSearchObj = {}
         this.errorMessage = ''
-        
+
         let error = false
 
         if (this.pmid === '' || this.pmid === null || this.pmid === undefined) {
@@ -112,6 +121,26 @@
         const cslItems = { items: { ...itemsBody } }
         
         return axios.post(CITEPROC_GET_MLA_CITATIONS, cslItems)
+      },
+      async checkAndConvertPMCIDtoPMID () {
+        this.pmcid = ''
+        if (this.pmid.toLowerCase().includes('pmc')) {
+          this.pmcid = this.pmid
+          const response = await axios.get(RETRIEVE_PMCID_PMID_URL + this.pmid).catch(() => this.errorMessage = 'Unable to conver PMCID to PMID')
+          const id = response.data.records[0].pmid
+          if (id !== undefined && id !== null && id !== '') {
+            this.pmid = id
+          }
+        } else {
+          this.getPMCIDFromPMID()
+        }
+      },
+      async getPMCIDFromPMID () {
+        const response = await axios.get(RETRIEVE_PMCID_PMID_URL + this.pmid).catch(() => this.errorMessage = 'Unable to conver PMID to PMCID')
+        const id = response.data.records[0].pmcid
+        if (id !== undefined && id !== null && id !== '') {
+          this.pmcid = id
+        }
       }
     }
   }
