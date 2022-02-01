@@ -5,7 +5,6 @@ Application to accept PMID and PMCID to obtain citation to upload the citation t
 ### Contents
 1. [Requirements](#requirements)
 1. [Git](#git)
-1. [Dockerhub](#dockerhub)
 1. [Docker Compose](#docker-compose)
 1. [Execute](#execute)
 
@@ -35,11 +34,6 @@ $ git submodule update --init
 $ cd ../citeproc-js-server
 $ git submodule update --init
 ```
-5. If you are deploying on a server skip the next section **Dockerhub** and proceed to [Docker Compose](#docker-compose)
-
-### Dockerhub
-- The images pulled from Dockerhub are configured to run on a local machine only
-- If your needs are to deploy the application on a server you will need to edit the Vue application Docker image, which will be discussed below in the [Docker Compose section](#docker-compose)
 
 ### Docker Compose
 - The docker-compose.yml file is used to build the Docker images and containers needed to deploy the PROGRAM_PMI application on a server
