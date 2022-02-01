@@ -11,9 +11,8 @@ client/node_modules
 client/dist
 client/.env*
 
-# external git repos
-citeproc-js-server/
-translation-server/
+# server
+server/node_modules/
 
 # Editor directories and files
 .idea
