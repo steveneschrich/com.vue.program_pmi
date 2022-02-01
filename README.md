@@ -7,6 +7,7 @@ Application to accept PMID and PMCID to obtain citation to upload the citation t
 1. [Git](#git)
 1. [Dockerhub](#dockerhub)
 1. [Docker Compose](#docker-compose)
+1. [Execute](#execute)
 
 ### Requirements
 1. nodejs v14.17+ (May work on older versions)
@@ -34,9 +35,92 @@ $ git submodule update --init
 $ cd ../citeproc-js-server
 $ git submodule update --init
 ```
+5. If you are deploying on a server skip the next section **Dockerhub** and proceed to [Docker Compose](#docker-compose)
 
 ### Dockerhub
 - The images pulled from Dockerhub are configured to run on a local machine only
 - If your needs are to deploy the application on a server you will need to edit the Vue application Docker image, which will be discussed below in the [Docker Compose section](#docker-compose)
 
 ### Docker Compose
+- The docker-compose.yml file is used to build the Docker images and containers needed to deploy the PROGRAM_PMI application on a server
+1. The docker-compose.yml is configured to provide some customizations to, namely the **pmi_vue** and **pmi_api** services.
+2. **IMPORTANT - pmi_vue service**: it is important to add to the **args** section your email for the variable: **NCBI_USER_EMAIL**
+3. **IMPORTANT - pmi_vue service**: it is important to change the hosts for the variables:
+    1. ZOTERO_TRANSLATOR_HOST
+    2. CITEPROC_HOST
+    3. EXPRESS_API_HOST
+4. **IMPORTANT - pmi_vue service**: it is important to note that the environment variable **PORT** must be exposed in the **ports** section if you should change it
+5. **IMPORTANT - pmi_api service**: it is important to add to the environment variables section values for the following variable:
+    1. REDCAP_API_URL
+        - this is the url where your RedCap API server is hosted
+    2. REDCAP_API_TOKEN
+        - this is RedCap API generated token whereby the program_pmi will use it to write the article citation to
+6. **NOTE pmi_zotero_translation service**: This service is forked from another project and as such its customization is limited and requires more source code changes than is allowed in the docker-compose.yml
+7. **NOTE pmi_citeproc service**: This service is forked from another project and as such its customization is limited and requires more source code changes than is allowed in the docker-compose.yml
+
+### Execute
+
+#### Docker
+```sh
+$ docker-compose up -d
+```
+
+#### Without Docker
+
+1. com.vue.program_pmi
+- Create **.env.production** file in client/ and make any necessary changes
+- **IMPORTANT**: make sure to add a valid email address to the variable **VUE_APP_NCBI_USER_EMAIL**
+- .env.production:
+```text
+VUE_APP_ZOTERO_TRANSLATOR_HOST=http://localhost
+VUE_APP_ZOTERO_TRANSLATOR_PORT=1969
+VUE_APP_CITEPROC_HOST=http://localhost
+VUE_APP_CITEPROC_PORT=8085
+VUE_APP_EXPRESS_API_HOST=http://localhost
+VUE_APP_EXPRESS_API_PORT=3001
+VUE_APP_NCBI_TOOL_NAME=program_pmi
+VUE_APP_NCBI_USER_EMAIL=<EMAIL_ADDRESS>
+```
+- Build Vue static files in client/:
+```sh
+$ cd client/
+$ npm install
+$ npm run build
+```
+- Move Vue static files folder dist/ to com.vue.program_pmi/server
+- Start server (default port is 5151):
+```sh
+$ cd com.vue.program_pmi/server
+$ npm run start
+```
+
+2. com.vue.program_pmi/com.express.api.program_pmi
+- Create .env.dev file in com.express.api.program_pmi/server/
+- .env.dev:
+```text
+PORT=3001
+REDCAP_API_URL=<REDCAP_API_URL>
+REDCAP_API_TOKEN=<REDCAP_API_TOKEN>
+```
+- Start server (port 3001):
+```sh
+$ cd server/
+$ npm install
+$ npm run start:dev
+```
+
+3. com.vue.program_pmi/citeproc-js-server
+- Reference [here](https://github.com/zotero/citeproc-js-server) for details
+```sh
+$ cd citeproc-js-server
+$ npm install 
+$ npm start
+```
+
+4. com.vue.program_pmi/translation-server
+- Reference [here](https://github.com/zotero/translation-server) for details
+```sh
+$ cd translation-server
+$ npm install
+$ npm start
+```
