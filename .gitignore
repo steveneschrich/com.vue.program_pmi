@@ -14,6 +14,11 @@ client/.env*
 # server
 server/node_modules/
 
+# other repos
+citeproc-js-server/
+com.express.api.program_pmi/
+translation-server/
+
 # Editor directories and files
 .idea
 .vscode
