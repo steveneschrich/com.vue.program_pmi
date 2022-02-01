@@ -11,7 +11,7 @@
         rounded
         filled
         v-model="pmid"
-        label="PMID"
+        label="PMID | PMCID"
         dark
         @keypress="onKeyPress"
       />
@@ -33,6 +33,7 @@
       :zoteroSearchObj="zoteroSearchObj[0]"
       :pmid="pmid"
       :pmcid="pmcid"
+      :newSearch="newSearch"
     />
     <div v-if="errorMessage !== ''" id="errorMessage">
       {{ errorMessage }}
@@ -62,7 +63,8 @@
         pmcid: '',
         citation: '',
         zoteroSearchObj: {},
-        errorMessage: ''
+        errorMessage: '',
+        newSearch: false
       }
     },
     methods: {
@@ -81,6 +83,7 @@
         this.citation = ''
         this.zoteroSearchObj = {}
         this.errorMessage = ''
+        this.newSearch = !this.newSearch
 
         let error = false
 

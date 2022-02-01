@@ -1,25 +1,54 @@
 <template>
-    <div v-if="citation !== ''" class="row justify-center">
-        <q-btn
-            outline
-            color="amber-7"
-            label="Store Pubmed Record"
-            @click="onClickStoreRecord"
-        />
+    <div>
+        <div v-if="citation !== ''" class="row justify-center">
+            <q-btn
+                outline
+                color="amber-7"
+                label="Store Pubmed Record"
+                @click="onClickStoreRecord"
+            />
+        </div>
+        <p/>
+        <div v-if="successMessage != ''" class="success textAlignCenter">{{this.successMessage}}</div>
+        <div v-if="errorMessage != ''" class="error textAlignCenter">{{this.errorMessage}}</div>
     </div>
 </template>
 
 <script>
+
+    import axios from 'axios'
+
+    const EXPRESS_API_REDCAP_CITATION = `${process.env.VUE_APP_EXPRESS_API_HOST}:${process.env.VUE_APP_EXPRESS_API_PORT}/redcap/citation/api/import`
+
     export default {
         name: 'StoreCitation',
         props: { 
             citation: String,
             zoteroSearchObj: Object,
             pmid: String,
-            pmcid: String
+            pmcid: String,
+            newSearch: Boolean
+        },
+        data () {
+            return {
+                successMessage: '',
+                errorMessage: ''
+            }
+        },
+        watch: {
+            newSearch (nVal, oVal) {
+                if (nVal !== oVal) {
+                    this.successMessage = ''
+                    this.errorMessage = ''
+                }
+            }
         },
         methods: {
             onClickStoreRecord () {
+
+                this.successMessage = ''
+                this.errorMessage = ''
+
                 const body = []
                 body.push({
                     record_id: this.zoteroSearchObj.key,
@@ -28,7 +57,7 @@
                     date_publication: this.zoteroSearchObj.date,
                     pub_citation_vol: this.zoteroSearchObj.volume,
                     pub_citation_issue: this.zoteroSearchObj.issue,
-                    pub_citation_page: this.zoteroSearchObj.pages,
+                    pub_citation_pg: this.zoteroSearchObj.pages,
                     pmid: this.pmid,
                     pmcid: this.pmcid
                 })
@@ -42,8 +71,19 @@
                     })
                 })
 
-                console.log(body)
-                // TODO post data to redcap
+                axios.post(EXPRESS_API_REDCAP_CITATION, body).then(res => {
+                    if (res.data.err) {
+                        this.errorMessage = res.data.message
+                    } else {
+                        this.successMessage = res.data.message
+                    }
+
+                })
+                .catch(err => {
+                    if (err.response.data.err) {
+                        this.errorMessage = err.response.data.message
+                    }
+                })
             }
         }
     }

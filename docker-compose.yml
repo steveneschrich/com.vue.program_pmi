@@ -1,0 +1,65 @@
+version: "3"
+services:
+  pmi_vue:
+    image: pmi_vue:1.0
+    build: 
+      context: .
+      args:
+        - ZOTERO_TRANSLATOR_HOST=http://localhost
+        - ZOTERO_TRANSLATOR_PORT=1969
+        - CITEPROC_HOST=http://localhost
+        - CITEPROC_PORT=8085
+        - EXPRESS_API_HOST=http://localhost
+        - EXPRESS_API_PORT=5152
+        - NCBI_TOOL_NAME=program_pmi
+        - NCBI_USER_EMAIL=<EMAIL_ADDRESS>
+    environment:
+      - PORT=5151
+    container_name: pmi_vue
+    depends_on:
+      - "pmi_api"
+      - "pmi_zotero_translation"
+      - "pmi_citeproc"
+    restart: always
+    ports: 
+      - "5151:5151"
+    networks:
+      - "pmi_network"
+
+  pmi_api:
+    image: pmi_api:1.0
+    build: ./com.express.api.program_pmi
+    environment:
+      - PORT=5152
+      - REDCAP_API_URL=<REDCAP_API_URL>
+      - REDCAP_API_TOKEN=<RECAP_API_TOKEN>
+    container_name: pmi_api
+    restart: always
+    ports: 
+      - "5152:5152"
+    networks:
+      - "pmi_network"
+
+  pmi_zotero_translation:
+    image: pmi_zotero_translation:1.0
+    build: ./translation-server
+    container_name: pmi_zotero_translation
+    restart: always
+    ports: 
+      - "1969:1969"
+    networks:
+      - "pmi_network"
+
+  pmi_citeproc:
+    image: pmi_citeproc:1.0
+    build: ./citeproc-js-server
+    container_name: pmi_citeproc
+    restart: always
+    ports: 
+      - "8085:8085"
+    networks:
+      - "pmi_network"
+
+networks:
+  pmi_network:
+    name: "pmi_network"
