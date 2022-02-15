@@ -7,6 +7,7 @@ Application to accept PMID and PMCID to obtain citation to upload the citation t
 1. [Git](#git)
 1. [Docker Compose](#docker-compose)
 1. [Execute](#execute)
+1. [Troubleshooting](#troubleshooting)
 
 ### Requirements
 1. nodejs v14.17+ (May work on older versions)
@@ -118,3 +119,17 @@ $ cd translation-server
 $ npm install
 $ npm start
 ```
+
+### Troubleshooting
+
+1. Some IT infrastructures may have inplace various firewall security measures, which may interfere with **** and **** servers, often times throwing SSL certificate warnings and issues.  If you can trust your firewall then an option to override these errors can be enabled as explained below
+2. **translation-server**:
+    - In **config/default.json** set:
+    ```json
+    "nodeIgnoreTLS": true,
+    ```
+3. **citeproc-js-server**:
+    - In **config/default.json** set:
+    ```json
+    "nodeIgnoreTLS": true,
+    ```
