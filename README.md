@@ -18,14 +18,14 @@ Application to accept PMID and PMCID to obtain citation to upload the citation t
 - **NOTE**: for ease of application building please follow the below instructions:
 1. Clone repo **com.vue.program_pmi**
 ```sh
-$ git clone git@github.com:scottmrc/com.vue.program_pmi.git
+$ git clone https://github.com/scottmrc/com.vue.program_pmi.git
 ```
 2. Change directory into **com.vue.program_pmi** and clone the following repos:
 ```sh
 $ cd com.vue.program_pmi
-$ git clone git@github.com:scottmrc/com.express.api.program_pmi.git
-$ git clone git@github.com:scottmrc/citeproc-js-server.git
-$ git clone git@github.com:scottmrc/translation-server.git
+$ git clone https://github.com/scottmrc/com.express.api.program_pmi.git
+$ git clone https://github.com/scottmrc/citeproc-js-server.git
+$ git clone https://github.com/scottmrc/translation-server.git
 ```
 3. The **translation-server** and **citeproc-js-server** repos are forked repositories that simply enable CORS for deploying the application on a server
 4. The **translation-server** and **citeproc-js-server** repos contain git submodules that need initialized prior to building Docker images or running the servers locally
