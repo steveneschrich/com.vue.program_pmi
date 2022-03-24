@@ -3,7 +3,7 @@ import PmidQuery from '../views/PmidQuery'
 
 const routes = [
   {
-    path: '/program-pmi',
+    path: '/',
     name: 'PmidQuery',
     component: PmidQuery
   },

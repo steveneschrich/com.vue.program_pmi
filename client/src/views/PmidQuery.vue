@@ -47,12 +47,28 @@
   import Citation from '../components/Citation'
   import StoreCitation from '../components/StoreCitation.vue'
 
-  const ZOTERO_BASE_URL = `${process.env.VUE_APP_ZOTERO_TRANSLATOR_HOST}:${process.env.VUE_APP_ZOTERO_TRANSLATOR_PORT}`
-  const CITEPROC_BASE_URL = `${process.env.VUE_APP_CITEPROC_HOST}:${process.env.VUE_APP_CITEPROC_PORT}`
-  const ZOTERO_SEARCH_URL = `${ZOTERO_BASE_URL}/search`
-  const ZOTERO_EXPORT_TO_CSLJSON = `${ZOTERO_BASE_URL}/export?format=csljson`
-  const CITEPROC_GET_MLA_CITATIONS = `${CITEPROC_BASE_URL}?responseformat=html&style=modern-language-association&outputformat=text`
-  const RETRIEVE_PMCID_PMID_URL =   `https://www.ncbi.nlm.nih.gov/pmc/utils/idconv/v1.0/?tool=${process.env.VUE_APP_NCBI_TOOL_NAME}&email=${process.env.VUE_APP_NCBI_USER_EMAIL}&versions=no&format=json&ids=`
+  let ZOTERO_BASE_URL
+  let CITEPROC_BASE_URL
+  let ZOTERO_SEARCH_URL
+  let ZOTERO_EXPORT_TO_CSLJSON
+  let CITEPROC_GET_MLA_CITATIONS
+  let RETRIEVE_PMCID_PMID_URL
+
+  if (process.env.VUE_APP_PRODUCTION === 'true') {
+    ZOTERO_BASE_URL = process.env.VUE_APP_ZOTERO_TRANSLATOR_HOST
+    CITEPROC_BASE_URL = process.env.VUE_APP_CITEPROC_HOST
+    ZOTERO_SEARCH_URL = `${ZOTERO_BASE_URL}/search`
+    ZOTERO_EXPORT_TO_CSLJSON = `${ZOTERO_BASE_URL}/export?format=csljson`
+    CITEPROC_GET_MLA_CITATIONS = `${CITEPROC_BASE_URL}?responseformat=html&style=modern-language-association&outputformat=text`
+    RETRIEVE_PMCID_PMID_URL = `https://www.ncbi.nlm.nih.gov/pmc/utils/idconv/v1.0/?tool=${process.env.VUE_APP_NCBI_TOOL_NAME}&email=${process.env.VUE_APP_NCBI_USER_EMAIL}&versions=no&format=json&ids=`
+  } else {
+    ZOTERO_BASE_URL = `${process.env.VUE_APP_ZOTERO_TRANSLATOR_HOST}:${process.env.VUE_APP_ZOTERO_TRANSLATOR_PORT}`
+    CITEPROC_BASE_URL = `${process.env.VUE_APP_CITEPROC_HOST}:${process.env.VUE_APP_CITEPROC_PORT}`
+    ZOTERO_SEARCH_URL = `${ZOTERO_BASE_URL}/search`
+    ZOTERO_EXPORT_TO_CSLJSON = `${ZOTERO_BASE_URL}/export?format=csljson`
+    CITEPROC_GET_MLA_CITATIONS = `${CITEPROC_BASE_URL}?responseformat=html&style=modern-language-association&outputformat=text`
+    RETRIEVE_PMCID_PMID_URL = `https://www.ncbi.nlm.nih.gov/pmc/utils/idconv/v1.0/?tool=${process.env.VUE_APP_NCBI_TOOL_NAME}&email=${process.env.VUE_APP_NCBI_USER_EMAIL}&versions=no&format=json&ids=`
+  }
 
   export default {
     name: 'PmidQuery',

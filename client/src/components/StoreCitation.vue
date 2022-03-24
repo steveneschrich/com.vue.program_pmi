@@ -18,7 +18,13 @@
 
     import axios from 'axios'
 
-    const EXPRESS_API_REDCAP_CITATION = `${process.env.VUE_APP_EXPRESS_API_HOST}:${process.env.VUE_APP_EXPRESS_API_PORT}/redcap/citation/api/import`
+    let EXPRESS_API_REDCAP_CITATION
+    
+    if (process.env.VUE_APP_PRODUCTION === 'true') {
+EXPRESS_API_REDCAP_CITATION = `${process.env.VUE_APP_EXPRESS_API_HOST}/redcap/citation/api/import`
+    } else {
+        EXPRESS_API_REDCAP_CITATION = `${process.env.VUE_APP_EXPRESS_API_HOST}:${process.env.VUE_APP_EXPRESS_API_PORT}/redcap/citation/api/import`
+    }
 
     export default {
         name: 'StoreCitation',

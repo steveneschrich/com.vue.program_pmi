@@ -5,6 +5,7 @@ services:
     build: 
       context: .
       args:
+        - PRODUCTION=true
         - ZOTERO_TRANSLATOR_HOST=http://localhost
         - ZOTERO_TRANSLATOR_PORT=1969
         - CITEPROC_HOST=http://localhost
