@@ -3,7 +3,7 @@
         <div v-if="citation !== ''" class="row justify-center">
             <q-btn
                 outline
-                color="amber-7"
+                color="light-blue-14"
                 label="Store Pubmed Record"
                 @click="onClickStoreRecord"
             />
@@ -90,7 +90,7 @@
                     if (err.response.data.err) {
                         this.errorMessage = err.response.data.message
                         if (err.response.data.message.toLowerCase() === 'invalid token') {
-                            this.errorMessage += ' - redirecting to login'
+                            this.errorMessage += ' - redirecting to login in 5 seconds...'
                             setTimeout(() => {
                                 this.$router.push('/')
                             }, 5000)

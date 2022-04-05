@@ -9,13 +9,12 @@
                 <div class="row">
                     <q-input 
                         class="col-12"
-                        color="amber-7"
-                        label-color="amber-7"
+                        color="light-blue-14"
+                        label-color="light-blue-14"
                         rounded
                         filled
                         v-model="email"
                         label="Email"
-                        dark
                         @keypress="onKeyPress"
                     />
                 </div>
@@ -23,13 +22,12 @@
                 <div class="row">
                     <q-input 
                         class="col-12"
-                        color="amber-7"
-                        label-color="amber-7"
+                        color="light-blue-14"
+                        label-color="light-blue-14"
                         rounded
                         filled
                         v-model="password"
                         label="Password"
-                        dark
                         type="password"
                         @keypress="onKeyPress"
                     />
@@ -38,7 +36,7 @@
                 <div class="row justify-center">
                     <q-btn
                         outline
-                        color="amber-7"
+                        color="light-blue-14"
                         label="Submit"
                         @click="onClickSubmit"
                     />

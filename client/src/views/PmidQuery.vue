@@ -1,18 +1,23 @@
 <template>
   <div>
+    <Help :toggle="toggleHelp" @closeHelp="onCloseHelp"/>
     <div id="title">
       PROGRAM-PMI
+    </div>
+    <div class="row justify-center">
+      <div id="helpBtn" class="col-3">
+        <span @click="onClickHelp" style="cursor: pointer">Help</span>
+      </div>
     </div>
     <div id="inputPmid" class="row justify-center">
       <q-input 
         class="col-3"
-        color="amber-7"
-        label-color="amber-7"
+        color="light-blue-14"
+        label-color="light-blue-14"
         rounded
         filled
         v-model="pmid"
         label="PMID | PMCID"
-        dark
         @keypress="onKeyPress"
       />
     </div>
@@ -20,7 +25,7 @@
     <div class="row justify-center">
       <q-btn
         outline
-        color="amber-7"
+        color="light-blue-14"
         label="Retrieve Pubmed Record"
         @click="onClickSubmit"
       />
@@ -45,7 +50,8 @@
 
   import axios from 'axios'
   import Citation from '../components/Citation'
-  import StoreCitation from '../components/StoreCitation.vue'
+  import StoreCitation from '../components/StoreCitation'
+  import Help from '../components/Help'
 
   let ZOTERO_BASE_URL
   let CITEPROC_BASE_URL
@@ -72,7 +78,7 @@
 
   export default {
     name: 'PmidQuery',
-    components: { Citation, StoreCitation },
+    components: { Citation, StoreCitation, Help },
     data () {
       return {
         pmid: '',
@@ -80,7 +86,15 @@
         citation: '',
         zoteroSearchObj: {},
         errorMessage: '',
-        newSearch: false
+        newSearch: false,
+        toggleHelp: false
+      }
+    },
+    watch: {
+      pmid (nPmid, oPmid) {
+        if (nPmid !== oPmid) {
+          this.pmid = nPmid.replace(/\s/g, '')
+        }
       }
     },
     methods: {
@@ -101,11 +115,19 @@
         this.errorMessage = ''
         this.newSearch = !this.newSearch
 
+        const regexPMC = new RegExp(/^(?:PMC)\d+/g)
+        const regexPMI = new RegExp(/^\d+$/g)
+
         let error = false
 
         if (this.pmid === '' || this.pmid === null || this.pmid === undefined) {
           error = true
           this.errorMessage = 'PMID cannot be empty'
+        }
+
+        if (!regexPMC.test(this.pmid) && !regexPMI.test(this.pmid)) {
+          error = true
+          this.errorMessage = 'ID entered is not a valid PMID or PMCID'
         }
 
         if (!error) {
@@ -145,7 +167,7 @@
         this.pmcid = ''
         if (this.pmid.toLowerCase().includes('pmc')) {
           this.pmcid = this.pmid
-          const response = await axios.get(RETRIEVE_PMCID_PMID_URL + this.pmid).catch(() => this.errorMessage = 'Unable to conver PMCID to PMID')
+          const response = await axios.get(RETRIEVE_PMCID_PMID_URL + this.pmid).catch(() => this.errorMessage = 'Unable to convert PMCID to PMID')
           const id = response.data.records[0].pmid
           if (id !== undefined && id !== null && id !== '') {
             this.pmid = id
@@ -155,11 +177,17 @@
         }
       },
       async getPMCIDFromPMID () {
-        const response = await axios.get(RETRIEVE_PMCID_PMID_URL + this.pmid).catch(() => this.errorMessage = 'Unable to conver PMID to PMCID')
+        const response = await axios.get(RETRIEVE_PMCID_PMID_URL + this.pmid).catch(() => this.errorMessage = 'Unable to convert PMID to PMCID')
         const id = response.data.records[0].pmcid
         if (id !== undefined && id !== null && id !== '') {
           this.pmcid = id
         }
+      },
+      onClickHelp () {
+        this.toggleHelp = !this.toggleHelp
+      },
+      onCloseHelp (val) {
+        this.toggleHelp = val
       }
     }
   }
@@ -174,7 +202,6 @@
   }
 
   #inputPmid {
-    margin-top: 10vh;
   }
 
   #errorMessage {
@@ -182,6 +209,13 @@
     font-style: italic;
     text-align: center;
     font-weight: 500;
+  }
+
+  #helpBtn {
+    margin-top: 10vh;
+    text-align: end;
+    padding-right: 20px;
+    color: var(--primary-text);
   }
 
 </style>

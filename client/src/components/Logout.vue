@@ -45,6 +45,7 @@
 
     #logoutContainer {
         cursor: pointer;
+        color: var(--primary-text);
     }
 
 </style>
