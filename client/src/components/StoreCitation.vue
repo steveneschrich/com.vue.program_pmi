@@ -17,6 +17,7 @@
 <script>
 
     import axios from 'axios'
+    import { SESSION_STORAGE_KEY_TOKEN } from '../assets/js/constants'
 
     let EXPRESS_API_REDCAP_CITATION
     
@@ -77,7 +78,7 @@
                     })
                 })
 
-                axios.post(EXPRESS_API_REDCAP_CITATION, body).then(res => {
+                axios.post(EXPRESS_API_REDCAP_CITATION, body, { headers: { Authorization: `Bearer ${sessionStorage.getItem(SESSION_STORAGE_KEY_TOKEN)}` }}).then(res => {
                     if (res.data.err) {
                         this.errorMessage = res.data.message
                     } else {
@@ -88,6 +89,12 @@
                 .catch(err => {
                     if (err.response.data.err) {
                         this.errorMessage = err.response.data.message
+                        if (err.response.data.message.toLowerCase() === 'invalid token') {
+                            this.errorMessage += ' - redirecting to login'
+                            setTimeout(() => {
+                                this.$router.push('/')
+                            }, 5000)
+                        }
                     }
                 })
             }

@@ -1,12 +1,17 @@
 <template>
   <div>
+    <Logout/>
     <router-view/>
   </div>
 </template>
 
 <script>
+
+  import Logout from './components/Logout'
+
   export default {
-    name: 'App'
+    name: 'App',
+    components: { Logout }
   }
 </script>
 

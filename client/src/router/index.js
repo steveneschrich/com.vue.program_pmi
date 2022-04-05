@@ -1,9 +1,17 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import Login from '../views/Login'
 import PmidQuery from '../views/PmidQuery'
+import { SESSION_STORAGE_KEY_TOKEN } from '../assets/js/constants'
 
 const routes = [
   {
     path: '/',
+    alias: '/login',
+    name: 'Login',
+    component: Login
+  },
+  {
+    path: '/citation',
     name: 'PmidQuery',
     component: PmidQuery
   },
@@ -22,6 +30,20 @@ const routes = [
 const router = createRouter({
   history: createWebHistory(process.env.BASE_URL),
   routes
+})
+
+router.beforeEach((to, from, next) => {
+  console.log(to)
+  const token = sessionStorage.getItem(SESSION_STORAGE_KEY_TOKEN)
+
+  if (!token) {
+    if (to.path !== '/') {
+      next('/')
+    } else {
+      next()
+    }
+  }
+  next()
 })
 
 export default router
