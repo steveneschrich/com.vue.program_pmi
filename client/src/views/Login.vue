@@ -58,7 +58,7 @@
     let AUTH_URL
 
     if (process.env.VUE_APP_PRODUCTION === 'true') {
-        AUTH_URL = `${process.env.VUE_APP_EXPRESS_API_HOST}/program-pmi/api/auth/authenticate`
+        AUTH_URL = `${process.env.VUE_APP_EXPRESS_API_HOST}/auth/authenticate`
     } else {
         AUTH_URL = `${process.env.VUE_APP_EXPRESS_API_HOST}:${process.env.VUE_APP_EXPRESS_API_PORT}/auth/authenticate`
     }
