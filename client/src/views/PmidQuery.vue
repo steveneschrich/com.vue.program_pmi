@@ -1,18 +1,23 @@
 <template>
   <div>
+    <Help :toggle="toggleHelp" @closeHelp="onCloseHelp"/>
     <div id="title">
       PROGRAM-PMI
+    </div>
+    <div class="row justify-center">
+      <div id="helpBtn" class="col-3">
+        <span @click="onClickHelp" style="cursor: pointer">Help</span>
+      </div>
     </div>
     <div id="inputPmid" class="row justify-center">
       <q-input 
         class="col-3"
-        color="amber-7"
-        label-color="amber-7"
+        color="light-blue-14"
+        label-color="light-blue-14"
         rounded
         filled
         v-model="pmid"
         label="PMID | PMCID"
-        dark
         @keypress="onKeyPress"
       />
     </div>
@@ -20,7 +25,7 @@
     <div class="row justify-center">
       <q-btn
         outline
-        color="amber-7"
+        color="light-blue-14"
         label="Retrieve Pubmed Record"
         @click="onClickSubmit"
       />
@@ -45,18 +50,35 @@
 
   import axios from 'axios'
   import Citation from '../components/Citation'
-  import StoreCitation from '../components/StoreCitation.vue'
+  import StoreCitation from '../components/StoreCitation'
+  import Help from '../components/Help'
 
-  const ZOTERO_BASE_URL = `${process.env.VUE_APP_ZOTERO_TRANSLATOR_HOST}:${process.env.VUE_APP_ZOTERO_TRANSLATOR_PORT}`
-  const CITEPROC_BASE_URL = `${process.env.VUE_APP_CITEPROC_HOST}:${process.env.VUE_APP_CITEPROC_PORT}`
-  const ZOTERO_SEARCH_URL = `${ZOTERO_BASE_URL}/search`
-  const ZOTERO_EXPORT_TO_CSLJSON = `${ZOTERO_BASE_URL}/export?format=csljson`
-  const CITEPROC_GET_MLA_CITATIONS = `${CITEPROC_BASE_URL}?responseformat=html&style=modern-language-association&outputformat=text`
-  const RETRIEVE_PMCID_PMID_URL =   `https://www.ncbi.nlm.nih.gov/pmc/utils/idconv/v1.0/?tool=${process.env.VUE_APP_NCBI_TOOL_NAME}&email=${process.env.VUE_APP_NCBI_USER_EMAIL}&versions=no&format=json&ids=`
+  let ZOTERO_BASE_URL
+  let CITEPROC_BASE_URL
+  let ZOTERO_SEARCH_URL
+  let ZOTERO_EXPORT_TO_CSLJSON
+  let CITEPROC_GET_MLA_CITATIONS
+  let RETRIEVE_PMCID_PMID_URL
+
+  if (process.env.VUE_APP_PRODUCTION === 'true') {
+    ZOTERO_BASE_URL = process.env.VUE_APP_ZOTERO_TRANSLATOR_HOST
+    CITEPROC_BASE_URL = process.env.VUE_APP_CITEPROC_HOST
+    ZOTERO_SEARCH_URL = `${ZOTERO_BASE_URL}/search`
+    ZOTERO_EXPORT_TO_CSLJSON = `${ZOTERO_BASE_URL}/export?format=csljson`
+    CITEPROC_GET_MLA_CITATIONS = `${CITEPROC_BASE_URL}?responseformat=html&style=modern-language-association&outputformat=text`
+    RETRIEVE_PMCID_PMID_URL = `https://www.ncbi.nlm.nih.gov/pmc/utils/idconv/v1.0/?tool=${process.env.VUE_APP_NCBI_TOOL_NAME}&email=${process.env.VUE_APP_NCBI_USER_EMAIL}&versions=no&format=json&ids=`
+  } else {
+    ZOTERO_BASE_URL = `${process.env.VUE_APP_ZOTERO_TRANSLATOR_HOST}:${process.env.VUE_APP_ZOTERO_TRANSLATOR_PORT}`
+    CITEPROC_BASE_URL = `${process.env.VUE_APP_CITEPROC_HOST}:${process.env.VUE_APP_CITEPROC_PORT}`
+    ZOTERO_SEARCH_URL = `${ZOTERO_BASE_URL}/search`
+    ZOTERO_EXPORT_TO_CSLJSON = `${ZOTERO_BASE_URL}/export?format=csljson`
+    CITEPROC_GET_MLA_CITATIONS = `${CITEPROC_BASE_URL}?responseformat=html&style=modern-language-association&outputformat=text`
+    RETRIEVE_PMCID_PMID_URL = `https://www.ncbi.nlm.nih.gov/pmc/utils/idconv/v1.0/?tool=${process.env.VUE_APP_NCBI_TOOL_NAME}&email=${process.env.VUE_APP_NCBI_USER_EMAIL}&versions=no&format=json&ids=`
+  }
 
   export default {
     name: 'PmidQuery',
-    components: { Citation, StoreCitation },
+    components: { Citation, StoreCitation, Help },
     data () {
       return {
         pmid: '',
@@ -64,7 +86,15 @@
         citation: '',
         zoteroSearchObj: {},
         errorMessage: '',
-        newSearch: false
+        newSearch: false,
+        toggleHelp: false
+      }
+    },
+    watch: {
+      pmid (nPmid, oPmid) {
+        if (nPmid !== oPmid) {
+          this.pmid = nPmid.replace(/\s/g, '')
+        }
       }
     },
     methods: {
@@ -85,11 +115,19 @@
         this.errorMessage = ''
         this.newSearch = !this.newSearch
 
+        const regexPMC = new RegExp(/^(?:PMC)\d+/g)
+        const regexPMI = new RegExp(/^\d+$/g)
+
         let error = false
 
         if (this.pmid === '' || this.pmid === null || this.pmid === undefined) {
           error = true
           this.errorMessage = 'PMID cannot be empty'
+        }
+
+        if (!regexPMC.test(this.pmid) && !regexPMI.test(this.pmid)) {
+          error = true
+          this.errorMessage = 'ID entered is not a valid PMID or PMCID'
         }
 
         if (!error) {
@@ -129,7 +167,7 @@
         this.pmcid = ''
         if (this.pmid.toLowerCase().includes('pmc')) {
           this.pmcid = this.pmid
-          const response = await axios.get(RETRIEVE_PMCID_PMID_URL + this.pmid).catch(() => this.errorMessage = 'Unable to conver PMCID to PMID')
+          const response = await axios.get(RETRIEVE_PMCID_PMID_URL + this.pmid).catch(() => this.errorMessage = 'Unable to convert PMCID to PMID')
           const id = response.data.records[0].pmid
           if (id !== undefined && id !== null && id !== '') {
             this.pmid = id
@@ -139,11 +177,17 @@
         }
       },
       async getPMCIDFromPMID () {
-        const response = await axios.get(RETRIEVE_PMCID_PMID_URL + this.pmid).catch(() => this.errorMessage = 'Unable to conver PMID to PMCID')
+        const response = await axios.get(RETRIEVE_PMCID_PMID_URL + this.pmid).catch(() => this.errorMessage = 'Unable to convert PMID to PMCID')
         const id = response.data.records[0].pmcid
         if (id !== undefined && id !== null && id !== '') {
           this.pmcid = id
         }
+      },
+      onClickHelp () {
+        this.toggleHelp = !this.toggleHelp
+      },
+      onCloseHelp (val) {
+        this.toggleHelp = val
       }
     }
   }
@@ -158,7 +202,6 @@
   }
 
   #inputPmid {
-    margin-top: 10vh;
   }
 
   #errorMessage {
@@ -166,6 +209,13 @@
     font-style: italic;
     text-align: center;
     font-weight: 500;
+  }
+
+  #helpBtn {
+    margin-top: 10vh;
+    text-align: end;
+    padding-right: 20px;
+    color: var(--primary-text);
   }
 
 </style>

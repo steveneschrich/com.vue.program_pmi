@@ -6,8 +6,8 @@
         <div v-if="citation !== ''" class="row justify-center">
             <q-input 
                 class="col-10"
-                color="amber-7"
-                label-color="amber-7"
+                color="light-blue-14"
+                label-color="light-blue-14"
                 standout
                 v-model="citationModel"
                 label="Citation"
