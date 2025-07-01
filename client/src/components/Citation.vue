@@ -23,6 +23,16 @@
                     />
                 </template>
             </q-input>
+
+            <div v-if="affiliations">
+                <strong> Affiliations: </strong>
+                <ul>
+                    <li v-for="author in affiliations" :key="author.lastName">
+                        {{ author.name }}:
+                        {{ author.affiliation || 'No affiliation available' }}
+                    </li>
+                </ul>
+            </div>
             <p/>
         </div>
     </div>
@@ -31,7 +41,7 @@
 <script>
     export default {
         name: 'Citation',
-        props: { citation: String },
+        props: { citation: String, affiliations: Object },
         data () {
             return {
                 citationModel: ''

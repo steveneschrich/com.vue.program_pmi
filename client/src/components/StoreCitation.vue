@@ -34,7 +34,8 @@
             zoteroSearchObj: Object,
             pmid: String,
             pmcid: String,
-            newSearch: Boolean
+            newSearch: Boolean,
+            affiliations: Object
         },
         data () {
             return {
@@ -66,17 +67,24 @@
                     pub_citation_issue: this.zoteroSearchObj.issue,
                     pub_citation_pg: this.zoteroSearchObj.pages,
                     pmid: this.pmid,
-                    pmcid: this.pmcid
+                    pmcid: this.pmcid,
+                    affilitaions: this.affiliations
                 })
 
                 this.zoteroSearchObj.creators.forEach((creator, index) => {
-                    body.push({
+                    const authorData = {
                         record_id: this.zoteroSearchObj.key,
                         redcap_repeat_instrument: 'authors',
                         redcap_repeat_instance: index+1,
                         author_name: `${creator.firstName} ${creator.lastName}`
-                    })
+                    }
+                    if (this.affiliations){
+                        authorData.author_affiliation = this.affiliations.filter(affiliation => affiliation.name === `${creator.firstName} ${creator.lastName}`)[0].affiliation
+                        authorData.author_affiliation_date = this.zoteroSearchObj.date
+                    }
+                    body.push(authorData)
                 })
+                
 
                 axios.post(EXPRESS_API_REDCAP_CITATION, body, { headers: { Authorization: `Bearer ${sessionStorage.getItem(SESSION_STORAGE_KEY_TOKEN)}` }}).then(res => {
                     if (res.data.err) {

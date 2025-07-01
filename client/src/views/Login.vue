@@ -14,7 +14,7 @@
                         rounded
                         filled
                         v-model="email"
-                        label="Email"
+                        label="User ID"
                         @keypress="onKeyPress"
                     />
                 </div>

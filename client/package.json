@@ -12,7 +12,8 @@
     "axios": "^0.25.0",
     "quasar": "^2.0.0",
     "vue": "^3.0.0",
-    "vue-router": "^4.0.0-0"
+    "vue-router": "^4.0.0-0",
+    "xml2js": "^0.6.2"
   },
   "devDependencies": {
     "@vue/cli-plugin-eslint": "~4.5.0",

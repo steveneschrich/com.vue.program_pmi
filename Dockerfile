@@ -1,5 +1,4 @@
 FROM node:17.4.0-alpine3.14
-
 ARG CLIENT_DIR=/opt/client
 ARG SERVER_DIR=/opt/server
 ARG NODE_OPTIONS=--openssl-legacy-provider
@@ -13,6 +12,7 @@ ARG EXPRESS_API_HOST=http://localhost
 ARG EXPRESS_API_PORT=5152
 ARG NCBI_TOOL_NAME=program_pmi
 ARG NCBI_USER_EMAIL=""
+
 
 RUN mkdir -p ${SERVER_DIR} ${CLIENT_DIR}
 

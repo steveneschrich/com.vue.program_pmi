@@ -35,11 +35,12 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
   const token = sessionStorage.getItem(SESSION_STORAGE_KEY_TOKEN)
   if (!token) {
-    if (to.path !== '/') {
-      next('/')
-    } else {
-      next()
-    }
+    console.log('not logged in')
+    // if (to.path !== '/') {
+    //   next('/')
+    // } else {
+    //   next()
+    // }
   }
   next()
 })

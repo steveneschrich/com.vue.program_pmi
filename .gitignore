@@ -27,3 +27,4 @@ translation-server/
 *.njsproj
 *.sln
 *.sw?
+data

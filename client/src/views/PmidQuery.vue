@@ -31,7 +31,7 @@
       />
     </div>
     <p/>
-    <Citation :citation="citation"/>
+    <Citation :citation="citation" :affiliations="affiliations"/>
     <p/>
     <StoreCitation
       :citation="citation"
@@ -39,6 +39,7 @@
       :pmid="pmid"
       :pmcid="pmcid"
       :newSearch="newSearch"
+      :affiliations="affiliations"
     />
     <div v-if="errorMessage !== ''" id="errorMessage">
       {{ errorMessage }}
@@ -52,6 +53,7 @@
   import Citation from '../components/Citation'
   import StoreCitation from '../components/StoreCitation'
   import Help from '../components/Help'
+  import xml2js from 'xml2js'
 
   let ZOTERO_BASE_URL
   let CITEPROC_BASE_URL
@@ -85,6 +87,7 @@
         pmcid: '',
         citation: '',
         zoteroSearchObj: {},
+        affiliations: [],
         errorMessage: '',
         newSearch: false,
         toggleHelp: false
@@ -134,7 +137,22 @@
           const resZoteroSearch = await this.search().catch(() => this.errorMessage = 'Zotero search failed and returned no results')
           const resZoteroExport = await this.zoteroToCslJson(resZoteroSearch.data).catch(() => this.errorMessage = 'Unable to convert Zotero to CSL JSON')
           const resCiteprocMla = await this.citeProcGetCitation(resZoteroExport.data).catch(() => this.errorMessage = 'Cannot retrieve citation')
+          const pubmedResponse = await axios.get('https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi', {
+            params: {
+              db: 'pubmed',
+              id: this.pmid,
+              retmode: 'xml'
+            }
+          });
 
+          const xml = pubmedResponse.data
+          const parsed = await xml2js.parseStringPromise(xml);
+          const authors = parsed.PubmedArticleSet.PubmedArticle[0].MedlineCitation[0].Article[0].AuthorList[0].Author;
+          this.affiliations = authors.map(author => ({
+            name: `${author.ForeName[0]} ${author.LastName[0]}`,
+            affiliation: author.AffiliationInfo ? author.AffiliationInfo[0].Affiliation[0] : null
+          }));
+          
           if (resCiteprocMla.data !== '' && resCiteprocMla.data !== null && resCiteprocMla.data !== undefined) {
             this.citation = resCiteprocMla.data
             this.zoteroSearchObj = resZoteroSearch.data
