@@ -62,21 +62,23 @@
   let CITEPROC_GET_MLA_CITATIONS
   let RETRIEVE_PMCID_PMID_URL
 
+  RETRIEVE_PMCID_PMID_URL = '/api/idconv'
+
   if (process.env.VUE_APP_PRODUCTION === 'true') {
     ZOTERO_BASE_URL = process.env.VUE_APP_ZOTERO_TRANSLATOR_HOST
     CITEPROC_BASE_URL = process.env.VUE_APP_CITEPROC_HOST
     ZOTERO_SEARCH_URL = `${ZOTERO_BASE_URL}/search`
     ZOTERO_EXPORT_TO_CSLJSON = `${ZOTERO_BASE_URL}/export?format=csljson`
     CITEPROC_GET_MLA_CITATIONS = `${CITEPROC_BASE_URL}?responseformat=html&style=modern-language-association&outputformat=text`
-    RETRIEVE_PMCID_PMID_URL = `https://www.ncbi.nlm.nih.gov/pmc/utils/idconv/v1.0/?tool=${process.env.VUE_APP_NCBI_TOOL_NAME}&email=${process.env.VUE_APP_NCBI_USER_EMAIL}&versions=no&format=json&ids=`
-  } else {
+    RETRIEVE_PMCID_PMID_URL = `${process.env.VUE_APP_EXPRESS_API_HOST}/api/idconv`
+   } else {
     ZOTERO_BASE_URL = `${process.env.VUE_APP_ZOTERO_TRANSLATOR_HOST}:${process.env.VUE_APP_ZOTERO_TRANSLATOR_PORT}`
     CITEPROC_BASE_URL = `${process.env.VUE_APP_CITEPROC_HOST}:${process.env.VUE_APP_CITEPROC_PORT}`
     ZOTERO_SEARCH_URL = `${ZOTERO_BASE_URL}/search`
     ZOTERO_EXPORT_TO_CSLJSON = `${ZOTERO_BASE_URL}/export?format=csljson`
     CITEPROC_GET_MLA_CITATIONS = `${CITEPROC_BASE_URL}?responseformat=html&style=modern-language-association&outputformat=text`
-    RETRIEVE_PMCID_PMID_URL = `https://www.ncbi.nlm.nih.gov/pmc/utils/idconv/v1.0/?tool=${process.env.VUE_APP_NCBI_TOOL_NAME}&email=${process.env.VUE_APP_NCBI_USER_EMAIL}&versions=no&format=json&ids=`
-  }
+    RETRIEVE_PMCID_PMID_URL = `${process.env.VUE_APP_EXPRESS_API_HOST}:${process.env.VUE_APP_EXPRESS_API_PORT}/api/idconv`
+   }
 
   export default {
     name: 'PmidQuery',
@@ -161,6 +163,11 @@
           }
         }
       },
+      buildIdConvUrl (id) {
+        // Only send the ID to server endpoint
+        const params = new URLSearchParams({ id });
+        return `${RETRIEVE_PMCID_PMID_URL}?${params.toString()}`;
+      },
       search () {
         const options = {
           headers: { 'Content-Type': 'text/plain' }
@@ -185,20 +192,39 @@
         this.pmcid = ''
         if (this.pmid.toLowerCase().includes('pmc')) {
           this.pmcid = this.pmid
-          const response = await axios.get(RETRIEVE_PMCID_PMID_URL + this.pmid).catch(() => this.errorMessage = 'Unable to convert PMCID to PMID')
-          const id = response.data.records[0].pmid
-          if (id !== undefined && id !== null && id !== '') {
-            this.pmid = id
+          try {
+            const response = await axios.get(this.buildIdConvUrl(this.pmid))
+            if (response && response.data && Array.isArray(response.data.records) && response.data.records.length > 0) {
+              const id = response.data.records[0].pmid
+              if (id) this.pmid = id
+              else this.errorMessage = 'PMCID found but no PMID returned'
+            } else {
+              this.errorMessage = 'No records returned when converting PMCID to PMID'
+            }
+          } catch (err) {
+            console.error('error converting PMCID to PMID', err)
+            this.errorMessage = 'Unable to convert PMCID to PMID'
           }
         } else {
           this.getPMCIDFromPMID()
         }
       },
       async getPMCIDFromPMID () {
-        const response = await axios.get(RETRIEVE_PMCID_PMID_URL + this.pmid).catch(() => this.errorMessage = 'Unable to convert PMID to PMCID')
-        const id = response.data.records[0].pmcid
-        if (id !== undefined && id !== null && id !== '') {
-          this.pmcid = id
+        try {
+          const response = await axios.get(this.buildIdConvUrl(this.pmid))
+          if (response && response.data && Array.isArray(response.data.records) && response.data.records.length > 0) {
+            const id = response.data.records[0].pmcid
+            if (id) this.pmcid = id
+            else {
+              this.pmcid = ''
+              this.errorMessage = 'No PMCID found for this PMID'
+            }
+          } else {
+            this.errorMessage = 'No records returned when converting PMID to PMCID'
+          }
+        } catch (e) {
+          console.log('error retrieving pmcid from pmid:', e)
+          this.errorMessage = 'Unable to convert PMID to PMCID'
         }
       },
       onClickHelp () {

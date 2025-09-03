@@ -26,6 +26,7 @@
     } else {
         EXPRESS_API_REDCAP_CITATION = `${process.env.VUE_APP_EXPRESS_API_HOST}:${process.env.VUE_APP_EXPRESS_API_PORT}/redcap/citation/api/import`
     }
+    console.log('EXPRESS_API_REDCAP_CITATION', EXPRESS_API_REDCAP_CITATION)
 
     export default {
         name: 'StoreCitation',
@@ -67,8 +68,7 @@
                     pub_citation_issue: this.zoteroSearchObj.issue,
                     pub_citation_pg: this.zoteroSearchObj.pages,
                     pmid: this.pmid,
-                    pmcid: this.pmcid,
-                    affilitaions: this.affiliations
+                    pmcid: this.pmcid
                 })
 
                 this.zoteroSearchObj.creators.forEach((creator, index) => {
@@ -78,13 +78,28 @@
                         redcap_repeat_instance: index+1,
                         author_name: `${creator.firstName} ${creator.lastName}`
                     }
+                    
                     if (this.affiliations){
-                        authorData.author_affiliation = this.affiliations.filter(affiliation => affiliation.name === `${creator.firstName} ${creator.lastName}`)[0].affiliation
-                        authorData.author_affiliation_date = this.zoteroSearchObj.date
+
+                        const creatorFullName = `${creator.firstName} ${creator.lastName}`
+                        const normalize = str => str
+                        .replace(/\./g, '')        // remove dots
+                        .replace(/\s+/g, ' ')      // collapse multiple spaces
+                        .trim()
+                        .toLowerCase()
+
+                        const match = this.affiliations.find(aff =>
+                        normalize(aff.name) === normalize(creatorFullName)
+                        )
+
+                        if (match) {
+                            authorData.author_institution = match.affiliation
+                            // authorData.author_affiliation_date = this.zoteroSearchObj.date
+                        }
                     }
                     body.push(authorData)
                 })
-                
+                console.log('body',body)
 
                 axios.post(EXPRESS_API_REDCAP_CITATION, body, { headers: { Authorization: `Bearer ${sessionStorage.getItem(SESSION_STORAGE_KEY_TOKEN)}` }}).then(res => {
                     if (res.data.err) {
@@ -96,6 +111,7 @@
                 })
                 .catch(err => {
                     if (err.response.data.err) {
+                        console.log('err.response', err.response)
                         this.errorMessage = err.response.data.message
                         if (err.response.data.message.toLowerCase() === 'invalid token') {
                             this.errorMessage += ' - redirecting to login in 5 seconds...'
